@@ -1,12 +1,9 @@
-// === USER DATA & ASSETS ===
-
-// 1. MIHARU ASSETS
-const assistantAssets = {
-    idle: "https://i.postimg.cc/7PTStzS5/Miharu-Sena-Kanaka-102.webp",
-    panic: "https://i.postimg.cc/XNFykb0G/dkue4ms-e6745b82-c5c5-4ff7-8b51-661ac520dab6.png"
+// === DATA ===
+const assets = {
+    miharuIdle: "https://i.postimg.cc/7PTStzS5/Miharu-Sena-Kanaka-102.webp",
+    miharuPanic: "https://i.postimg.cc/XNFykb0G/dkue4ms-e6745b82-c5c5-4ff7-8b51-661ac520dab6.png"
 };
 
-// 2. GACHA POOL (Your 21 Cards)
 const gachaPool = [
     { id: 1, name: "Senpai No!", rarity: "R", img: "https://i.postimg.cc/T2CvSyxB/08ab55e72055d80ed0c3763bb45469ef.jpg" },
     { id: 2, name: "Oops!", rarity: "C", img: "https://i.postimg.cc/mZ8Wqc40/28b5885bdec16466708559c40533333a.jpg" },
@@ -31,98 +28,66 @@ const gachaPool = [
     { id: 21, name: "Bath...", rarity: "SSR", img: "https://i.postimg.cc/rp1wt84w/images_(3).jpg" }
 ];
 
-// === STATE MANAGEMENT ===
-let state = {
-    bananas: 0,
-    tasks: [],
-    inventory: [], // IDs of collected cards
-    panicMode: false
-};
-
-// Load from LocalStorage
-if(localStorage.getItem('bravoState')) {
-    state = JSON.parse(localStorage.getItem('bravoState'));
+// === APP STATE ===
+let state = { bananas: 0, tasks: [], inventory: [], panicMode: false };
+if(localStorage.getItem('seirenState')) {
+    state = JSON.parse(localStorage.getItem('seirenState'));
 }
 
-// === DOM ELEMENTS ===
-const els = {
-    bananaCount: document.getElementById('banana-count'),
-    pendingCount: document.getElementById('pending-count'),
-    taskList: document.getElementById('task-list'),
-    assistantImg: document.getElementById('assistant-img'),
-    assistantBubble: document.getElementById('assistant-dialogue'),
-    appBg: document.getElementById('app-background'),
-    galleryGrid: document.getElementById('gallery-grid')
-};
+// === DOM HELPERS ===
+const el = (id) => document.getElementById(id);
 
-// === INITIALIZATION ===
-function init() {
-    updateUI();
-    renderTasks();
-    renderGallery();
-    setInterval(checkOverdue, 10000); // Check for panic mode every 10 sec
-    checkOverdue();
-}
-
-// === LOGIC ===
-
-function saveState() {
-    localStorage.setItem('bravoState', JSON.stringify(state));
+function save() {
+    localStorage.setItem('seirenState', JSON.stringify(state));
     updateUI();
 }
 
 function updateUI() {
-    els.bananaCount.innerText = state.bananas;
-    // Panic Visuals
-    if (state.panicMode) {
+    el('banana-count').innerText = state.bananas;
+    el('pending-count').innerText = state.tasks.filter(t => !t.completed).length;
+    
+    // Panic Logic
+    if(state.panicMode) {
         document.body.classList.add('panic-active');
-        els.appBg.classList.remove('bg-safe');
-        els.appBg.classList.add('bg-panic');
-        els.assistantImg.src = assistantAssets.panic;
-        els.assistantBubble.innerText = "Why is it late...? Are you leaving me?";
+        el('app-background').className = 'bg-panic';
+        el('assistant-img').src = assets.miharuPanic;
+        el('assistant-dialogue').innerText = "Why are you late...? I'm scared.";
     } else {
         document.body.classList.remove('panic-active');
-        els.appBg.classList.add('bg-safe');
-        els.appBg.classList.remove('bg-panic');
-        els.assistantImg.src = assistantAssets.idle;
+        el('app-background').className = 'bg-safe';
+        el('assistant-img').src = assets.miharuIdle;
     }
 }
 
-// --- TASK SYSTEM ---
+// === TASKS ===
 function addTask() {
-    const input = document.getElementById('task-input');
-    const date = document.getElementById('task-date');
-    const type = document.getElementById('task-type');
-
-    if (!input.value) return;
-
-    const newTask = {
+    const txt = el('task-input').value;
+    if(!txt) return;
+    
+    state.tasks.push({
         id: Date.now(),
-        text: input.value,
-        due: date.value, // ISO string
-        type: type.value,
+        text: txt,
+        due: el('task-date').value,
+        type: el('task-type').value,
         completed: false
-    };
-
-    state.tasks.push(newTask);
-    input.value = '';
-    saveState();
+    });
+    
+    el('task-input').value = '';
+    save();
     renderTasks();
     checkOverdue();
-    
-    // Miharu Reaction
-    els.assistantBubble.innerText = "New mission? Don't disappoint me.";
+    el('assistant-dialogue').innerText = "New mission accepted.";
 }
 
 function toggleTask(id) {
     const task = state.tasks.find(t => t.id === id);
-    if (task) {
+    if(task) {
         task.completed = !task.completed;
-        if (task.completed) {
+        if(task.completed) {
             state.bananas += 10;
-            els.assistantBubble.innerText = "Good girl! Here is a banana.";
+            el('assistant-dialogue').innerText = "Good job! +10 Bananas";
         }
-        saveState();
+        save();
         renderTasks();
         checkOverdue();
     }
@@ -130,101 +95,79 @@ function toggleTask(id) {
 
 function deleteTask(id) {
     state.tasks = state.tasks.filter(t => t.id !== id);
-    saveState();
+    save();
     renderTasks();
     checkOverdue();
 }
 
 function renderTasks() {
-    els.taskList.innerHTML = '';
-    let pending = 0;
-
-    state.tasks.forEach(task => {
-        if (!task.completed) pending++;
-        
-        const isOverdue = task.due && new Date(task.due) < new Date() && !task.completed;
-        
+    el('task-list').innerHTML = '';
+    state.tasks.forEach(t => {
+        const isOverdue = t.due && new Date(t.due) < new Date() && !t.completed;
         const li = document.createElement('li');
-        li.className = `task-item task-${task.type} ${isOverdue ? 'task-overdue' : ''}`;
-        
+        li.className = `task-item task-${t.type} ${isOverdue ? 'task-overdue' : ''}`;
+        li.style.opacity = t.completed ? '0.5' : '1';
         li.innerHTML = `
-            <span>
-                ${isOverdue ? '⚠️ ' : ''} 
-                <span style="${task.completed ? 'text-decoration: line-through;' : ''}">${task.text}</span>
-            </span>
+            <span>${isOverdue ? '⚠️ ' : ''}${t.text}</span>
             <div>
-                <button onclick="toggleTask(${task.id})">${task.completed ? 'Undo' : 'Done'}</button>
-                <button onclick="deleteTask(${task.id})">X</button>
+                <button onclick="toggleTask(${t.id})">${t.completed ? 'Undo' : 'Done'}</button>
+                <button onclick="deleteTask(${t.id})">X</button>
             </div>
         `;
-        els.taskList.appendChild(li);
+        el('task-list').appendChild(li);
     });
-
-    els.pendingCount.innerText = pending;
 }
 
-// --- PANIC SYSTEM ---
 function checkOverdue() {
     const now = new Date();
-    let hasOverdue = false;
-    
-    state.tasks.forEach(task => {
-        if (task.due && new Date(task.due) < now && !task.completed) {
-            hasOverdue = true;
-        }
+    let panic = false;
+    state.tasks.forEach(t => {
+        if(t.due && new Date(t.due) < now && !t.completed) panic = true;
     });
-
-    if (hasOverdue !== state.panicMode) {
-        state.panicMode = hasOverdue;
-        saveState();
+    if(state.panicMode !== panic) {
+        state.panicMode = panic;
+        save();
     }
 }
 
-// --- GACHA SYSTEM ---
+// === GACHA ===
 function pullGacha() {
-    if (state.bananas < 50) {
-        alert("Not enough Bananas! (Need 50)");
-        return;
-    }
-
+    if(state.bananas < 50) { alert("Need 50 Bananas!"); return; }
     state.bananas -= 50;
     
-    // Probability Logic
-    const rand = Math.random();
-    let rarity = 'C';
-    if (rand > 0.6) rarity = 'R'; // 30%
-    if (rand > 0.9) rarity = 'SSR'; // 10%
-
-    // Filter Pool
-    const pool = gachaPool.filter(c => c.rarity === rarity);
-    const result = pool[Math.floor(Math.random() * pool.length)];
-
-    // Add to Inventory if not exists (or allow duplicates? Let's unique for now)
-    if (!state.inventory.includes(result.id)) {
-        state.inventory.push(result.id);
-    }
-
-    saveState();
+    const r = Math.random();
+    let tier = 'C';
+    if(r > 0.6) tier = 'R';
+    if(r > 0.9) tier = 'SSR';
     
-    // Show Result
-    const resDiv = document.getElementById('gacha-result');
-    resDiv.classList.remove('hidden');
-    resDiv.innerHTML = `
-        <div class="card-display rarity-${result.rarity}" style="transform: scale(1.5);">
-            <img src="${result.img}">
-            <div class="card-info">${result.name}</div>
+    const pool = gachaPool.filter(c => c.rarity === tier);
+    const win = pool[Math.floor(Math.random() * pool.length)];
+    
+    if(!state.inventory.includes(win.id)) state.inventory.push(win.id);
+    save();
+    
+    // Show Overlay
+    el('gacha-overlay').classList.remove('hidden');
+    el('reveal-container').innerHTML = `
+        <div class="card-display rarity-${win.rarity}" style="width: 200px; transform: scale(1.2);">
+            <img src="${win.img}">
+            <div class="card-info">${win.name}</div>
         </div>
-        <p style="margin-top:20px; text-align:center;">You got a ${result.rarity}!</p>
-        <button onclick="document.getElementById('gacha-result').classList.add('hidden'); renderGallery()">OK</button>
+        <h2 style="color:white; margin-top:20px;">${win.rarity} GET!</h2>
     `;
 }
 
+function closeGacha() {
+    el('gacha-overlay').classList.add('hidden');
+    renderGallery();
+}
+
 function renderGallery() {
-    els.galleryGrid.innerHTML = '';
+    el('gallery-grid').innerHTML = '';
     state.inventory.forEach(id => {
         const item = gachaPool.find(c => c.id === id);
-        if (item) {
-            els.galleryGrid.innerHTML += `
+        if(item) {
+            el('gallery-grid').innerHTML += `
                 <div class="card-display rarity-${item.rarity}">
                     <img src="${item.img}">
                     <div class="card-info">${item.name}</div>
@@ -234,36 +177,27 @@ function renderGallery() {
     });
 }
 
-// --- EXTRAS ---
+// === SYSTEM ===
+function switchView(id) {
+    ['view-dashboard','view-missions','view-gacha','view-gallery'].forEach(v => {
+        el(v).classList.add('hidden-view');
+        el(v).classList.remove('active-view');
+    });
+    el(id).classList.remove('hidden-view');
+    el(id).classList.add('active-view');
+}
+
 function feedAssistant() {
-    if (state.bananas >= 5) {
+    if(state.bananas >= 5) {
         state.bananas -= 5;
-        saveState();
-        els.assistantBubble.innerText = "Nom nom... You're sweet today.";
-        // Simple shake animation
-        els.assistantImg.style.transform = "rotate(10deg)";
-        setTimeout(() => els.assistantImg.style.transform = "rotate(0deg)", 200);
-    } else {
-        alert("Need 5 Bananas!");
-    }
+        el('assistant-dialogue').innerText = "Delicious... More please?";
+        save();
+    } else { alert("Not enough bananas!"); }
 }
 
-function switchView(viewId) {
-    document.querySelectorAll('section').forEach(el => el.classList.remove('active-view'));
-    document.querySelectorAll('section').forEach(el => el.classList.add('hidden-view'));
-    document.getElementById(viewId).classList.add('active-view');
-    document.getElementById(viewId).classList.remove('hidden-view');
-}
-
-// Boss Key (Double click Logo)
-document.getElementById('boss-trigger').addEventListener('dblclick', () => {
-    document.getElementById('boss-screen').classList.remove('hidden');
-});
-
-document.getElementById('boss-screen').addEventListener('dblclick', () => {
-    document.getElementById('boss-screen').classList.add('hidden');
-});
-
-// Start
-init();
+// Init
+setInterval(checkOverdue, 5000);
+updateUI();
+renderTasks();
+renderGallery();
 
