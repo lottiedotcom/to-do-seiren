@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BravoList OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="app-background" class="bg-safe"></div>
+    <div class="scanlines"></div>
+
+    <div id="boss-screen" class="hidden">
+        <div class="boss-content">
+            <h1>SYSTEM STANDBY</h1>
+            <p>Press Double-Tap to Resume</p>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <header>
+            <div class="logo" id="boss-trigger">♥ SEIREN OS</div>
+            <div class="currency-display">
+                <img src="https://i.postimg.cc/C16TRtcx/6g3mnqy9685d1.png" alt="Banana">
+                <span id="banana-count">0</span>
+            </div>
+        </header>
+
+        <section id="view-dashboard" class="active-view">
+            <div class="assistant-container">
+                <div class="speech-bubble" id="assistant-dialogue">
+                    Welcome back... I was waiting.
+                </div>
+                <img id="assistant-img" src="https://i.postimg.cc/7PTStzS5/Miharu-Sena-Kanaka-102.webp" alt="Miharu">
+            </div>
+            
+            <div class="quick-stats">
+                <p>Tasks Due: <span id="pending-count">0</span></p>
+                <button class="feed-btn" onclick="feedAssistant()">Give Banana (-5)</button>
+            </div>
+        </section>
+
+        <section id="view-missions" class="hidden-view">
+            <h2>♥ Mission Log</h2>
+            
+            <div class="input-group">
+                <input type="text" id="task-input" placeholder="New mission...">
+                <input type="datetime-local" id="task-date">
+                <select id="task-type">
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <button onclick="addTask()">ADD</button>
+            </div>
+
+            <ul id="task-list">
+                </ul>
+        </section>
+
+        <section id="view-gacha" class="hidden-view">
+            <div class="gacha-machine">
+                <h2>♥ Summon</h2>
+                <p>Cost: 50 Bananas</p>
+                <button class="pull-btn" onclick="pullGacha()">PULL LEVER</button>
+            </div>
+            <div id="gacha-result" class="hidden">
+                </div>
+        </section>
+
+        <section id="view-gallery" class="hidden-view">
+            <h2>♥ Collection</h2>
+            <div id="gallery-grid">
+                </div>
+        </section>
+
+        <nav>
+            <button onclick="switchView('view-dashboard')">Home</button>
+            <button onclick="switchView('view-missions')">Tasks</button>
+            <button onclick="switchView('view-gacha')">Gacha</button>
+            <button onclick="switchView('view-gallery')">Gallery</button>
+        </nav>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
