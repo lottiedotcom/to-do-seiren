@@ -247,3 +247,23 @@ input, select {
     justify-content: center;
 }
 
+/* === MOBILE MENU FIX (Paste at the very bottom) === */
+nav {
+    position: fixed !important;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    padding-bottom: 15px; /* Adds space for phone bottom bar */
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 2px solid var(--primary);
+}
+
+.app-container {
+    height: 100dvh; /* "dvh" adapts to the mobile URL bar automatically */
+}
+
+section {
+    padding-bottom: 80px !important; /* Ensures the last task isn't covered by the menu */
+}
+
