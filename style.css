@@ -1,0 +1,249 @@
+:root {
+    --primary: #FF69B4; /* Hot Pink */
+    --secondary: #89CFF0; /* Baby Blue */
+    --bg-color: #FFF0F5; /* Lavender Blush */
+    --text-color: #555;
+    --font-head: 'VT323', monospace;
+    --font-body: 'Quicksand', sans-serif;
+    --border-radius: 15px;
+}
+
+/* === BASE STYLES === */
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    overflow: hidden;
+    color: var(--text-color);
+}
+
+/* Background Handling */
+#app-background {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -2;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.5s ease;
+}
+
+.bg-safe {
+    background-image: url('https://i.postimg.cc/PxBH69YP/pngtree-small-fresh-pink-element-tile-background-picture-image-1657739.png');
+}
+
+/* PANIC MODE STYLES */
+.bg-panic {
+    background-image: url('https://i.postimg.cc/0y8sHpKg/images-(4).jpg');
+    filter: contrast(1.2) brightness(0.8);
+}
+
+body.panic-active .app-container {
+    border: 2px solid red;
+    box-shadow: 0 0 20px red;
+    animation: shake 0.5s infinite;
+}
+
+body.panic-active header, body.panic-active nav {
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 2px solid red;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+/* Scanlines Overlay */
+.scanlines {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* === APP CONTAINER === */
+.app-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: white;
+    border-bottom: 2px solid var(--secondary);
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+}
+
+.currency-display img {
+    width: 20px;
+    vertical-align: middle;
+}
+
+/* Views */
+section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: none; /* Hidden by default */
+}
+
+.active-view { display: block; }
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    padding: 10px;
+    border-top: 2px solid var(--primary);
+}
+
+nav button {
+    background: none;
+    border: none;
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+/* === DASHBOARD === */
+.assistant-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#assistant-img {
+    max-width: 80%;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+    transition: transform 0.2s;
+}
+
+#assistant-img:active {
+    transform: scale(0.95);
+}
+
+.speech-bubble {
+    background: white;
+    border: 2px solid var(--secondary);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-family: var(--font-head);
+    position: relative;
+}
+
+/* === TASKS === */
+.input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+input, select {
+    padding: 8px;
+    border: 1px solid var(--secondary);
+    border-radius: 5px;
+    font-family: var(--font-body);
+}
+
+#task-list {
+    list-style: none;
+    padding: 0;
+}
+
+.task-item {
+    background: white;
+    border-left: 5px solid var(--secondary);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-urgent { border-left-color: red; }
+.task-personal { border-left-color: var(--primary); }
+.task-work { border-left-color: blue; }
+
+.task-overdue {
+    background: #ffe6e6;
+    color: red;
+    font-weight: bold;
+}
+
+/* === CARD STYLES (GACHA & GALLERY) === */
+.card-display {
+    width: 150px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px;
+    background: white;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: inline-block;
+    vertical-align: top;
+}
+
+.card-display img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.card-info {
+    padding: 5px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Rarities */
+.rarity-C { border: 3px solid #89CFF0; } /* Blue */
+.rarity-R { border: 3px solid #FF69B4; } /* Pink */
+
+.rarity-SSR { 
+    border: 3px solid transparent;
+    background-image: linear-gradient(white, white), linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    box-shadow: 0 0 15px gold;
+}
+
+/* === BOSS KEY === */
+.hidden { display: none !important; }
+
+#boss-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: black;
+    color: green;
+    z-index: 9999;
+    font-family: monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
